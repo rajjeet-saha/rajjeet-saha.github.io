@@ -23,9 +23,9 @@
     --gradient-accent: linear-gradient(135deg, #ff6b6b, #ff9a3d);
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
-    --color-module1: #f9a825;
-    --color-module2: #0288d1;
-    --color-module3: #d32f2f;
+    --color-module1: #ffb300;
+    --color-module2: #039be5;
+    --color-module3: #e53935;
     --dark-bg: #121212;
     --dark-card-bg: #1e1e1e;
     --dark-text: #e0e0e0;
@@ -58,12 +58,14 @@
   body.dark-mode .stat-card,
   body.dark-mode .sidebar,
   body.dark-mode .dashboard-header,
-  body.dark-mode .content-card {
+  body.dark-mode .content-card,
+  body.dark-mode .progress-graph-svg {
     background-color: var(--dark-card-bg);
     box-shadow: none;
     border-color: var(--dark-border);
   }
-  body.dark-mode .input-group input {
+  body.dark-mode .input-group input,
+  body.dark-mode .input-group select {
     background-color: var(--dark-card-bg);
     border-color: var(--dark-border);
     color: var(--dark-text);
@@ -75,7 +77,8 @@
   body.dark-mode .user-info,
   body.dark-mode .progress-name,
   body.dark-mode .progress-date,
-  body.dark-mode .progress-value {
+  body.dark-mode .progress-value,
+  body.dark-mode .progress-graph-label {
     color: var(--dark-text);
   }
   body.dark-mode .nav-item:hover,
@@ -97,7 +100,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* colorful gradient background */
     background: linear-gradient(45deg, #ff6b6b, #f9a825, #4a6cf7, #6cbbf2);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
@@ -183,16 +185,17 @@
     color: var(--text);
   }
 
-  .input-group input {
+  .input-group input, .input-group select {
     width: 100%;
     padding: 15px;
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 1rem;
     transition: all 0.3s;
+    font-family: 'Poppins', sans-serif; /* Ensure select inherits font */
   }
 
-  .input-group input:focus {
+  .input-group input:focus, .input-group select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
@@ -283,7 +286,7 @@
   .sidebar {
     width: 260px;
     background: var(--card-bg);
-    height: calc(100vh - 80px);
+    height: calc(100vh - 85px); /* Adjusted for header height */
     border-right: 1px solid var(--border);
     padding: 20px 0;
     overflow-y: auto;
@@ -318,7 +321,7 @@
     flex: 1;
     padding: 30px;
     overflow-y: auto;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 85px); /* Adjusted for header height */
     transition: background-color 0.3s, color 0.3s;
   }
 
@@ -358,41 +361,6 @@
     overflow: hidden;
   }
 
-  /* Add subtle background images or colors in stat cards */
-  .stat-card.active-patients::before {
-    content: "";
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    width: 120px;
-    height: 120px;
-    background: url('https://cdn-icons-png.flaticon.com/512/1077/1077114.png') no-repeat center/contain;
-    opacity: 0.1;
-    pointer-events: none;
-  }
-  .stat-card.completion-rate::before {
-    content: "";
-    position: absolute;
-    top: -15px;
-    left: -15px;
-    width: 110px;
-    height: 110px;
-    background: url('https://cdn-icons-png.flaticon.com/512/190/190411.png') no-repeat center/contain;
-    opacity: 0.1;
-    pointer-events: none;
-  }
-  .stat-card.avg-session-time::before {
-    content: "";
-    position: absolute;
-    bottom: -20px;
-    right: -20px;
-    width: 130px;
-    height: 130px;
-    background: url('https://cdn-icons-png.flaticon.com/512/2921/2921222.png') no-repeat center/contain;
-    opacity: 0.1;
-    pointer-events: none;
-  }
-
   .stat-icon {
     width: 50px;
     height: 50px;
@@ -404,284 +372,74 @@
     font-size: 1.5rem;
     z-index: 1;
   }
+  .stat-icon.blue { background: rgba(74, 108, 247, 0.1); color: var(--primary); }
+  .stat-icon.green { background: rgba(74, 222, 128, 0.1); color: var(--success); }
+  .stat-icon.orange { background: rgba(255, 107, 107, 0.1); color: var(--accent); }
 
-  .stat-icon.blue {
-    background: rgba(74, 108, 247, 0.1);
-    color: var(--primary);
-  }
+  .stat-value { font-size: 2rem; font-weight: 700; margin-bottom: 5px; z-index: 1; }
+  .stat-label { color: var(--text-light); font-size: 0.9rem; z-index: 1; }
 
-  .stat-icon.green {
-    background: rgba(74, 222, 128, 0.1);
-    color: var(--success);
-  }
+  .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
 
-  .stat-icon.orange {
-    background: rgba(255, 107, 107, 0.1);
-    color: var(--accent);
-  }
+  .content-card { background: var(--card-bg); border-radius: 15px; padding: 25px; box-shadow: var(--shadow); transition: background-color 0.3s, color 0.3s; }
+  .content-card h3 { font-family: 'Montserrat', sans-serif; font-weight: 600; margin-bottom: 15px; color: var(--text); font-size: 1.3rem; }
 
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-    z-index: 1;
-  }
+  .progress-list { list-style: none; }
+  .progress-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); }
+  .progress-item:last-child { border-bottom: none; }
+  .progress-info { display: flex; flex-direction: column; }
+  .progress-name { font-weight: 500; margin-bottom: 5px; }
+  .progress-date { color: var(--text-light); font-size: 0.85rem; }
+  .progress-value { font-weight: 600; color: var(--primary); }
 
-  .stat-label {
-    color: var(--text-light);
-    font-size: 0.9rem;
-    z-index: 1;
-  }
-
-  .content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-  }
-
-  .content-card {
-    background: var(--card-bg);
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: var(--shadow);
-    transition: background-color 0.3s, color 0.3s;
-  }
-
-  .content-card h3 {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: var(--text);
-    font-size: 1.3rem;
-  }
-
-  .demo-video {
-    width: 100%;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 20px;
-  }
-
-  .demo-video img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-  }
-
-  .play-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .play-button:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-
-  .play-button i {
-    color: var(--primary);
-    font-size: 1.5rem;
-  }
-
-  .progress-list {
-    list-style: none;
-  }
-
-  .progress-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .progress-item:last-child {
-    border-bottom: none;
-  }
-
-  .progress-info {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .progress-name {
-    font-weight: 500;
-    margin-bottom: 5px;
-  }
-
-  .progress-date {
-    color: var(--text-light);
-    font-size: 0.85rem;
-  }
-
-  .progress-value {
-    font-weight: 600;
-    color: var(--primary);
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Responsive */
-  @media (max-width: 992px) {
-    .dashboard-container {
-      flex-direction: column;
-    }
-
-    .sidebar {
-      width: 100%;
-      height: auto;
-    }
-
-    .dashboard-content {
-      height: auto;
-    }
-
-    .stats-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .content-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .login-container {
-      padding: 30px 20px;
-    }
-  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   /* Patient Management Table */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-  }
-  th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-  }
-  th {
-    background-color: var(--secondary);
-    color: white;
-    font-weight: 600;
-  }
-  body.dark-mode th {
-    background-color: var(--primary-dark);
-  }
-  tr:hover {
-    background-color: rgba(74, 108, 247, 0.1);
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { padding: 12px 15px; border-bottom: 1px solid var(--border); text-align: left; }
+  th { background-color: var(--secondary); color: white; font-weight: 600; }
+  body.dark-mode th { background-color: var(--primary-dark); }
+  tr:hover { background-color: rgba(74, 108, 247, 0.1); }
 
- /* Progress Tracking Bars */
-  .progress-bar-container {
-    margin-top: 20px;
-  }
-  .progress-bar {
-    background: var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    height: 25px;
-    margin-bottom: 15px;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.5s ease;
-    color: white;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-  }
-  .progress-bar-fill.improvement {
-    background: var(--success);
-  }
-  .progress-bar-fill.decline {
-    background: var(--accent);
-  }
-  .progress-bar-label {
-    margin-bottom: 5px;
-    font-weight: 600;
-  }
+  /* Progress Tracking Graphs */
+  .progress-graph-wrapper { margin-bottom: 40px; max-width: 300px; margin-left: auto; margin-right: auto; }
+  .progress-graph-label { font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .progress-graph-legend { display: flex; justify-content: center; gap: 20px; margin-bottom: 10px; font-size: 0.9rem; }
+  .progress-graph-svg { border-radius: 15px; box-shadow: var(--shadow); display: block; background-color: var(--card-bg); }
+  .axis-line { stroke: var(--border); stroke-width: 2; }
+  .past-line { fill: none; stroke: var(--accent); stroke-width: 3; }
+  .present-line { fill: none; stroke: var(--success); stroke-width: 3; }
 
   /* Learning Modules Cards */
-  .modules-list {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+  .modules-list { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+  .module-card { flex: 0 0 250px; height: 250px; border-radius: 20px; padding: 20px; box-shadow: var(--shadow); cursor: pointer; color: white; font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: transform 0.3s, box-shadow 0.3s; user-select: none; text-align: center; }
+  .module-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+  .module-card.module1 { background-color: var(--color-module1); }
+  .module-card.module2 { background-color: var(--color-module2); }
+  .module-card.module3 { background-color: var(--color-module3); }
 
-  .module-card {
-    flex: 0 0 250px;
-    height: 250px;
-    background: var(--card-bg);
-    border-radius: 20px;
-    padding: 0;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    color: var(--text);
-    font-weight: 700;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s, box-shadow 0.3s;
-    user-select: none;
-    text-align: center;
+  /* Full-Screen Video Overlays */
+  #module-video-page, #demos-section.active {
+      display: none; /* Hide by default */
   }
-
-  .module-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
+  #module-video-page.active, #demos-section.active {
+      display: flex; /* Show when active */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--dark-bg);
+      z-index: 1000;
+      padding: 30px;
   }
-
-  /* Module Video Page */
-  #module-video-page {
-    display: none;
-    min-height: 100vh;
-    padding: 40px 30px;
-    position: relative;
-    background: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
-    color: white;
-  }
-  #module-video-page .video-container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: rgba(0,0,0,0.7);
-    border-radius: 15px;
-    padding: 20px;
-  }
+  #module-video-page .video-container { max-width: 900px; width:100%; background: rgba(0,0,0,0.7); border-radius: 15px; padding: 20px; }
   #module-video-page video,
-  #module-video-page .video-placeholder {
+  #module-video-page .video-placeholder,
+  #demos-section .video-placeholder {
     width: 100%;
     height: 480px;
     background: #222;
@@ -692,986 +450,413 @@
     color: #888;
     font-size: 1.5rem;
   }
-  #module-video-page .back-btn {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    background: rgba(0,0,0,0.6);
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
-  }
-  #module-video-page .back-btn:hover {
-    background: rgba(0,0,0,0.9);
-  }
-
-  /* Demo Videos Fullscreen */
-  #demos-section video,
-  #demos-section .video-placeholder {
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    border-radius: 0;
-  }
-  #demos-section .video-placeholder {
-    background: #000;
-    color: #666;
-    font-size: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  #demos-section .video-placeholder { height: 100%; border-radius: 0; }
+  #module-video-page .back-btn { position: absolute; top: 30px; left: 30px; background: rgba(0,0,0,0.6); border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s; }
+  #module-video-page .back-btn:hover { background: rgba(0,0,0,0.9); }
 
   /* Reports Section */
-  #reports-section {
-    max-width: 900px;
-  }
-  #reports-section .report-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  #reports-section select {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    font-size: 1rem;
-  }
-  #reports-section button {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
-  }
-  #reports-section button:hover {
-    background: var(--primary-dark);
-  }
-  #reports-section table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  #reports-section th, #reports-section td {
-    padding: 12px 15px;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-  }
-  #reports-section th {
-    background-color: var(--secondary);
-    color: white;
-  }
-  body.dark-mode #reports-section th {
-    background-color: var(--primary-dark);
-  }
-  #reports-section tr:hover {
-    background-color: rgba(74, 108, 247, 0.1);
-  }
+  #reports-section { max-width: 900px; }
+  #reports-section .report-controls { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  #reports-section select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; }
+  #reports-section button { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s; }
+  #reports-section button:hover { background: var(--primary-dark); }
 
   /* Settings Section */
-  #settings-section {
-    max-width: 700px;
-  }
-  #settings-section h3 {
-    margin-top: 25px;
-    margin-bottom: 15px;
-  }
-  #settings-section label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  #settings-section input, #settings-section textarea, #settings-section select {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    font-size: 1rem;
-  }
-  #settings-section input:focus, #settings-section textarea:focus, #settings-section select:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
-  }
-  #settings-section button {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
-  }
-  #settings-section button:hover {
-    background: var(--primary-dark);
-  }
-  #settings-section .toggle-switch {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  #settings-section .toggle-switch input[type="checkbox"] {
-    width: 40px;
-    height: 20px;
-    position: relative;
-    appearance: none;
-    background: var(--border);
-    outline: none;
-    border-radius: 20px;
-    transition: background 0.3s;
-    cursor: pointer;
-  }
-  #settings-section .toggle-switch input[type="checkbox"]:checked {
-    background: var(--primary);
-  }
-  #settings-section .toggle-switch input[type="checkbox"]::before {
-    content: "";
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    top: 1px;
-    left: 1px;
-    background: white;
-    transition: 0.3s;
-  }
-  #settings-section .toggle-switch input[type="checkbox"]:checked::before {
-    left: 21px;
-  }
-  #settings-section .issue-list {
-    list-style: none;
-    padding-left: 0;
-  }
-  #settings-section .issue-list li {
-    margin-bottom: 10px;
-  }
-  #settings-section .issue-list label {
-    font-weight: 500;
-    cursor: pointer;
-  }
+  #settings-section { max-width: 700px; }
+  #settings-section h3 { margin-top: 25px; margin-bottom: 15px; }
+  #settings-section label { display: block; margin-bottom: 6px; font-weight: 600; }
+  #settings-section input, #settings-section textarea, #settings-section select { width: 100%; padding: 12px 15px; margin-bottom: 20px; border-radius: 10px; border: 1px solid var(--border); font-size: 1rem; }
+  #settings-section input:focus, #settings-section textarea:focus, #settings-section select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2); }
+  #settings-section button { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: background 0.3s; }
+  #settings-section button:hover { background: var(--primary-dark); }
+  #settings-section .toggle-switch { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  #settings-section .toggle-switch input[type="checkbox"] { width: 40px; height: 20px; position: relative; appearance: none; background: var(--border); outline: none; border-radius: 20px; transition: background 0.3s; cursor: pointer; }
+  #settings-section .toggle-switch input[type="checkbox"]:checked { background: var(--primary); }
+  #settings-section .toggle-switch input[type="checkbox"]::before { content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%; top: 1px; left: 1px; background: white; transition: 0.3s; }
+  #settings-section .toggle-switch input[type="checkbox"]:checked::before { left: 21px; }
 
-  /* Scrollbar styling for sidebar and dashboard content */
-  .sidebar::-webkit-scrollbar,
-  .dashboard-content::-webkit-scrollbar {
-    width: 8px;
+  /* Responsive */
+  @media (max-width: 992px) {
+    .dashboard-container { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    .dashboard-content { height: auto; }
   }
-  .sidebar::-webkit-scrollbar-thumb,
-  .dashboard-content::-webkit-scrollbar-thumb {
-    background-color: rgba(74, 108, 247, 0.3);
-    border-radius: 10px;
+  @media (max-width: 768px) {
+    .stats-grid, .content-grid { grid-template-columns: 1fr; }
+    .login-container { padding: 30px 20px; }
   }
-
 </style>
 </head>
 <body>
-  <!-- Login Screen -->
   <div id="login-screen">
     <div class="login-container">
       <div class="login-logo">
         <h1>ImmersiLearn VR</h1>
         <p>Transforming Learning for Children with ASD &amp; ID</p>
       </div>
-
       <div class="user-type-selector">
-        <div class="user-type active" data-type="user">
-          <i class="fas fa-user"></i> User
-        </div>
-        <div class="user-type" data-type="supervisor">
-          <i class="fas fa-user-shield"></i> Supervisor
-        </div>
+        <div class="user-type active" data-type="user"><i class="fas fa-user"></i> User</div>
+        <div class="user-type" data-type="supervisor"><i class="fas fa-user-shield"></i> Supervisor</div>
       </div>
-
       <div class="login-form">
-        <div class="input-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="name@example.com" />
-        </div>
-        <div class="input-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password" />
-        </div>
+        <div class="input-group"><label for="email">Email Address</label><input type="email" id="email" placeholder="name@example.com" /></div>
+        <div class="input-group"><label for="password">Password</label><input type="password" id="password" placeholder="Enter your password" /></div>
         <button class="btn btn-primary" id="login-btn">Login to Dashboard</button>
       </div>
-
-      <div class="login-extra">
-        <a href="#" id="forgot-password-link">Forgot Password?</a> | 
-        <a href="#" id="sign-up-link">Sign Up</a>
-      </div>
+      <div class="login-extra"><a href="#" id="forgot-password-link">Forgot Password?</a> | <a href="#" id="sign-up-link">Sign Up</a></div>
     </div>
   </div>
 
-  <!-- Sign Up Screen -->
-  <div id="signup-screen" style="display:none; min-height:100vh; display:flex; align-items:center; justify-content:center; background: var(--background);">
-    <div class="login-container" style="max-width: 420px;">
-      <div class="login-logo">
-        <h1>Sign Up</h1>
-        <p>Create a new account</p>
-      </div>
+  <div id="signup-screen" style="display:none;">
+    <div class="login-container">
+      <div class="login-logo"><h1>Sign Up</h1><p>Create a new account</p></div>
       <div class="login-form">
-        <div class="input-group">
-          <label for="signup-name">Full Name</label>
-          <input type="text" id="signup-name" placeholder="Your full name" />
-        </div>
-        <div class="input-group">
-          <label for="signup-email">Email Address</label>
-          <input type="email" id="signup-email" placeholder="name@example.com" />
-        </div>
-        <div class="input-group">
-          <label for="signup-password">Password</label>
-          <input type="password" id="signup-password" placeholder="Create a password" />
-        </div>
+        <div class="input-group"><label for="signup-name">Full Name</label><input type="text" id="signup-name" placeholder="Your full name" /></div>
+        <div class="input-group"><label for="signup-email">Email Address</label><input type="email" id="signup-email" placeholder="name@example.com" /></div>
+        <div class="input-group"><label for="signup-password">Password</label><input type="password" id="signup-password" placeholder="Create a password" /></div>
         <div class="input-group">
           <label for="signup-type">Account Type</label>
           <select id="signup-type">
-            <option value="user">User </option>
+            <option value="user">User</option>
             <option value="supervisor">Supervisor</option>
           </select>
         </div>
         <button class="btn btn-primary" id="signup-btn">Create Account</button>
       </div>
-      <div class="login-extra" style="margin-top: 10px;">
-        <a href="#" id="back-to-login-link">Back to Login</a>
-      </div>
+      <div class="login-extra" style="margin-top: 10px;"><a href="#" id="back-to-login-link">Back to Login</a></div>
     </div>
   </div>
 
-  <!-- Forgot Password Screen -->
-  <div id="forgot-password-screen" style="display:none; min-height:100vh; display:flex; align-items:center; justify-content:center; background: var(--background);">
-    <div class="login-container" style="max-width: 420px;">
-      <div class="login-logo">
-        <h1>Forgot Password</h1>
-        <p>Enter your email to reset password</p>
-      </div>
+  <div id="forgot-password-screen" style="display:none;">
+    <div class="login-container">
+      <div class="login-logo"><h1>Forgot Password</h1><p>Enter your email to reset password</p></div>
       <div class="login-form">
-        <div class="input-group">
-          <label for="forgot-email">Email Address</label>
-          <input type="email" id="forgot-email" placeholder="name@example.com" />
-        </div>
+        <div class="input-group"><label for="forgot-email">Email Address</label><input type="email" id="forgot-email" placeholder="name@example.com" /></div>
         <button class="btn btn-primary" id="reset-password-btn">Reset Password</button>
       </div>
-      <div class="login-extra" style="margin-top: 10px;">
-        <a href="#" id="back-to-login-link2">Back to Login</a>
-      </div>
+      <div class="login-extra" style="margin-top: 10px;"><a href="#" id="back-to-login-link2">Back to Login</a></div>
     </div>
   </div>
 
-  <!-- Main Dashboard -->
   <div id="main-dashboard">
     <div class="dashboard-header">
-      <div class="header-logo">
-        <h2>ImmersiLearn VR Dashboard</h2>
-      </div>
+      <div class="header-logo"><h2>ImmersiLearn VR Dashboard</h2></div>
       <div class="user-profile">
         <div class="user-avatar" id="user-avatar">JD</div>
         <div class="user-info">
           <div class="user-name" id="user-name">Dr. Jane Doe</div>
-          <div class="user-role" id="user-role">User </div>
+          <div class="user-role" id="user-role">User</div>
         </div>
       </div>
     </div>
 
     <div class="dashboard-container">
       <div class="sidebar" id="sidebar">
-        <a href="#" class="nav-item active" data-section="overview">
-          <i class="fas fa-home"></i> Overview
-        </a>
-        <a href="#" class="nav-item" data-section="patients" id="nav-patients">
-          <i class="fas fa-users"></i> Patients
-        </a>
-        <a href="#" class="nav-item" data-section="progress">
-          <i class="fas fa-chart-line"></i> Progress Tracking
-        </a>
-        <a href="#" class="nav-item" data-section="modules">
-          <i class="fas fa-cube"></i> Learning Modules
-        </a>
-        <a href="#" class="nav-item" data-section="demos" id="nav-demos">
-          <i class="fas fa-video"></i> Demo Videos
-        </a>
-        <a href="#" class="nav-item" data-section="reports">
-          <i class="fas fa-file-alt"></i> Reports
-        </a>
-        <a href="#" class="nav-item" data-section="settings">
-          <i class="fas fa-cog"></i> Settings
-        </a>
-        <a href="#" class="nav-item" id="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <a href="#" class="nav-item active" data-section="overview"><i class="fas fa-home"></i> Overview</a>
+        <a href="#" class="nav-item" data-section="patients" id="nav-patients"><i class="fas fa-users"></i> Patients</a>
+        <a href="#" class="nav-item" data-section="progress"><i class="fas fa-chart-line"></i> Progress Tracking</a>
+        <a href="#" class="nav-item" data-section="modules"><i class="fas fa-cube"></i> Learning Modules</a>
+        <a href="#" class="nav-item" data-section="demos" id="nav-demos"><i class="fas fa-video"></i> Demo Videos</a>
+        <a href="#" class="nav-item" data-section="reports"><i class="fas fa-file-alt"></i> Reports</a>
+        <a href="#" class="nav-item" data-section="settings"><i class="fas fa-cog"></i> Settings</a>
+        <a href="#" class="nav-item" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </div>
 
       <div class="dashboard-content">
-        <!-- Overview Section -->
         <div class="dashboard-section active" id="overview-section">
           <h2>Dashboard Overview</h2>
-
           <div class="stats-grid">
-            <div class="stat-card active-patients">
-              <div class="stat-icon blue">
-                <i class="fas fa-users"></i>
-              </div>
-              <div class="stat-value" id="stat-active-patients">24</div>
-              <div class="stat-label">Active Patients</div>
-            </div>
-
-            <div class="stat-card completion-rate">
-              <div class="stat-icon green">
-                <i class="fas fa-check-circle"></i>
-              </div>
-              <div class="stat-value" id="stat-completion-rate">83%</div>
-              <div class="stat-label">Average Completion Rate</div>
-            </div>
-
-            <div class="stat-card avg-session-time">
-              <div class="stat-icon orange">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div class="stat-value" id="stat-avg-session-time">7.5</div>
-              <div class="stat-label">Avg. Session Time (mins)</div>
-            </div>
+            <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div class="stat-value" id="stat-active-patients">24</div><div class="stat-label">Active Patients</div></div>
+            <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-value" id="stat-completion-rate">83%</div><div class="stat-label">Average Completion Rate</div></div>
+            <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-clock"></i></div><div class="stat-value" id="stat-avg-session-time">7.5</div><div class="stat-label">Avg. Session Time (mins)</div></div>
           </div>
-
           <div class="content-grid">
-            <div class="content-card">
-              <h3>Recent Activity</h3>
-              <div class="progress-list" id="recent-activity-list">
-                <div class="progress-item">
-                  <div class="progress-info">
-                    <div class="progress-name">Michael completed Morning Routine</div>
-                    <div class="progress-date">Today, 10:24 AM</div>
-                  </div>
-                  <div class="progress-value">92%</div>
-                </div>
-                <div class="progress-item">
-                  <div class="progress-info">
-                    <div class="progress-name">Sarah practiced Social Greetings</div>
-                    <div class="progress-date">Yesterday, 3:45 PM</div>
-                  </div>
-                  <div class="progress-value">78%</div>
-                </div>
-                <div class="progress-item">
-                  <div class="progress-info">
-                    <div class="progress-name">Alex started Emotional Regulation</div>
-                    <div class="progress-date">Sept 12, 9:15 AM</div>
-                  </div>
-                  <div class="progress-value">In Progress</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="content-card">
-              <h3>Latest Demo Video</h3>
-              <div class="demo-video">
-                <img src="https://placeholder-image-service.onrender.com/image/500x300?prompt=VR%20learning%20environment%20for%20children%20with%20ASD%20and%20ID&id=1" alt="Immersive VR learning environment showing a child interacting with educational content" />
-                <div class="play-button">
-                  <i class="fas fa-play"></i>
-                </div>
-              </div>
-              <p>Morning Routine Module - v2.3 updated with improved interaction feedback</p>
-            </div>
+            <div class="content-card"><h3>Recent Activity</h3><div class="progress-list" id="recent-activity-list"></div></div>
+            <div class="content-card"><h3>Latest Demo Video</h3><p>Morning Routine Module - v2.3 updated with improved interaction feedback</p></div>
           </div>
         </div>
-
-        <!-- Patients Section -->
-        <div class="dashboard-section" id="patients-section">
-          <h2>Patient Management</h2>
-          <table id="patients-table" aria-label="Patient Management Table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Diagnosis</th>
-                <th>Last Session</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Patient rows will be inserted dynamically -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Progress Tracking Section -->
-        <div class="dashboard-section" id="progress-section">
-          <h2>Progress Tracking</h2>
-          <p>Comparison of user progress over time:</p>
-          <div id="progress-comparison">
-            <!-- Progress bars will be inserted dynamically -->
-          </div>
-        </div>
-
-        <!-- Learning Modules Section -->
+        <div class="dashboard-section" id="patients-section"><h2>Patient Management</h2><table id="patients-table" aria-label="Patient Management Table"><thead><tr><th>Name</th><th>Age</th><th>Diagnosis</th><th>Last Session</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+        <div class="dashboard-section" id="progress-section"><h2>Progress Tracking</h2><p>Comparison of user progress over the last 7 sessions:</p><div id="progress-comparison"></div></div>
         <div class="dashboard-section" id="modules-section">
-          <h2>Learning Modules</h2>
-          <div class="modules-list" id="modules-list">
-            <div class="module-card module1" data-module="module1">Module 1</div>
-            <div class="module-card module2" data-module="module2">Module 2</div>
-            <div class="module-card module3" data-module="module3">Module 3</div>
-          </div>
-        </div>
-
-        <!-- Module Video Page -->
-        <div id="module-video-page">
-          <button class="back-btn" id="module-back-btn"><i class="fas fa-arrow-left"></i> Back</button>
-          <div class="video-container">
-            <div class="video-placeholder" id="module-video-placeholder">
-              Video will be uploaded here later
+            <h2>Learning Modules</h2>
+            <div class="modules-list" id="modules-list">
+                <div class="module-card module1" data-module="Module 1">Module 1</div>
+                <div class="module-card module2" data-module="Module 2">Module 2</div>
+                <div class="module-card module3" data-module="Module 3">Module 3</div>
             </div>
-          </div>
         </div>
-
-        <!-- Demo Videos Section -->
         <div class="dashboard-section" id="demos-section">
-          <h2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demo Videos</h2>
-          <div class="video-placeholder" style="height: 100vh; width: 100vw; background: #000; color: #666; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-            Demo video will cover the whole screen here
-          </div>
+            <div class="video-placeholder">Demo video will cover the whole screen here</div>
         </div>
-
-        <!-- Reports Section -->
-        <div class="dashboard-section" id="reports-section">
-          <h2>Reports</h2>
-          <div class="report-controls">
-            <label for="sort-reports">Sort by:</label>
-            <select id="sort-reports">
-              <option value="date-desc">Date (Newest First)</option>
-              <option value="date-asc">Date (Oldest First)</option>
-              <option value="name-asc">Name (A-Z)</option>
-              <option value="name-desc">Name (Z-A)</option>
-            </select>
-            <button id="download-pdf-btn">Download PDF</button>
-          </div>
-          <table id="reports-table" aria-label="Reports Table">
-            <thead>
-              <tr>
-                <th>Patient Name</th>
-                <th>Report Date</th>
-                <th>Summary</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Report rows inserted dynamically -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Settings Section -->
+        <div class="dashboard-section" id="reports-section"><h2>Reports</h2><div class="report-controls"><label for="sort-reports">Sort by:</label><select id="sort-reports"><option value="date-desc">Date (Newest First)</option><option value="date-asc">Date (Oldest First)</option><option value="name-asc">Name (A-Z)</option><option value="name-desc">Name (Z-A)</option></select><button id="download-report-btn">Download Report</button></div><table id="reports-table" aria-label="Reports Table"><thead><tr><th>Patient Name</th><th>Report Date</th><th>Summary</th></tr></thead><tbody></tbody></table></div>
         <div class="dashboard-section" id="settings-section">
-          <h2>Settings</h2>
-
-          <h3>Edit Profile</h3>
-          <label for="profile-name">Name</label>
-          <input type="text" id="profile-name" />
-          <label for="profile-email">Email</label>
-          <input type="email" id="profile-email" />
-          <button id="save-profile-btn">Save Profile</button>
-
-          <h3>Change Password</h3>
-          <label for="current-password">Current Password</label>
-          <input type="password" id="current-password" />
-          <label for="new-password">New Password</label>
-          <input type="password" id="new-password" />
-          <label for="confirm-password">Confirm New Password</label>
-          <input type="password" id="confirm-password" />
-          <button id="change-password-btn">Change Password</button>
-
-          <h3>Contact Us</h3>
-          <p>Phone: +91 9115207977</p>
-          <p>Email: dratexinclusion@gmail.com</p>
-          <p>Social Media:</p>
-          <ul>
-            <li><a href="#" target="_blank">Facebook</a></li>
-            <li><a href="#" target="_blank">Twitter</a></li>
-            <li><a href="#" target="_blank">Instagram</a></li>
-          </ul>
-
-          <h3>Dark Mode</h3>
-          <div class="toggle-switch">
-            <input type="checkbox" id="dark-mode-toggle" />
-            <label for="dark-mode-toggle">Enable Dark Mode</label>
-          </div>
-
-          <h3>Report an Issue</h3>
-          <label for="issue-select">Select a problem:</label>
-          <select id="issue-select">
-            <option value="">-- Select an issue --</option>
-            <option value="navigation">How to navigate through the dashboard</option>
-            <option value="login">Login issues</option>
-            <option value="video">Video playback problems</option>
-            <option value="module">Module content questions</option>
-            <option value="other">Other</option>
-          </select>
-          <label for="issue-description">Describe your issue:</label>
-          <textarea id="issue-description" rows="4" placeholder="Provide more details here..."></textarea>
-          <button id="submit-issue-btn">Submit Issue</button>
-          <div id="issue-feedback" style="margin-top:10px; font-weight:600;"></div>
+            <h2>Settings</h2>
+            <h3>Edit Profile</h3><label for="profile-name">Name</label><input type="text" id="profile-name" /><label for="profile-email">Email</label><input type="email" id="profile-email" /><button id="save-profile-btn">Save Profile</button>
+            <h3>Change Password</h3><label for="current-password">Current Password</label><input type="password" id="current-password" /><label for="new-password">New Password</label><input type="password" id="new-password" /><label for="confirm-password">Confirm New Password</label><input type="password" id="confirm-password" /><button id="change-password-btn">Change Password</button>
+            <h3>Contact Us</h3><p>Phone: +91 9115207977</p><p>Email: dratexinclusion@gmail.com</p>
+            <h3>Dark Mode</h3><div class="toggle-switch"><input type="checkbox" id="dark-mode-toggle" /><label for="dark-mode-toggle">Enable Dark Mode</label></div>
+            <h3>Report an Issue</h3><label for="issue-select">Select a problem:</label><select id="issue-select"><option value="">-- Select an issue --</option><option value="navigation">Navigation issues</option><option value="login">Login issues</option><option value="video">Video playback problems</option><option value="other">Other</option></select><label for="issue-description">Describe your issue:</label><textarea id="issue-description" rows="4" placeholder="Provide more details here..."></textarea><button id="submit-issue-btn">Submit Issue</button><div id="issue-feedback" style="margin-top:10px; font-weight:600;"></div>
         </div>
       </div>
     </div>
   </div>
 
-<script>
-  // Data for patients
-  const patientsData = [
-    { name: "Michael Smith", age: 8, diagnosis: "ASD", lastSession: "2024-06-10", status: "Active" },
-    { name: "Sarah Johnson", age: 10, diagnosis: "ID", lastSession: "2024-06-09", status: "Active" },
-    { name: "Alex Lee", age: 7, diagnosis: "ASD", lastSession: "2024-06-08", status: "In Progress" },
-    { name: "Emily Davis", age: 9, diagnosis: "ID", lastSession: "2024-06-07", status: "Active" },
-    { name: "Daniel Brown", age: 11, diagnosis: "ASD", lastSession: "2024-06-05", status: "Inactive" },
-    { name: "Olivia Wilson", age: 8, diagnosis: "ID", lastSession: "2024-06-04", status: "Active" }
-  ];
+    <div id="module-video-page">
+      <button class="back-btn" id="module-back-btn"><i class="fas fa-arrow-left"></i> Back</button>
+      <div class="video-container">
+        <div class="video-placeholder" id="module-video-placeholder">Video will be uploaded here later</div>
+      </div>
+    </div>
 
-  // Data for reports
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Simulated Data
+  const patientsData = [
+    { name: "Michael Smith", age: 8, diagnosis: "ASD", lastSession: "2025-09-16", status: "Active" },
+    { name: "Sarah Johnson", age: 10, diagnosis: "ID", lastSession: "2025-09-15", status: "Active" },
+    { name: "Alex Lee", age: 7, diagnosis: "ASD", lastSession: "2025-09-14", status: "In Progress" },
+    { name: "Emily Davis", age: 9, diagnosis: "ID", lastSession: "2025-09-12", status: "Active" },
+  ];
   const reportsData = patientsData.map(p => ({
     name: p.name,
     date: new Date(p.lastSession),
-    summary: Report summary for ${p.name} with diagnosis ${p.diagnosis}.
+    summary: `Report summary for ${p.name} with diagnosis ${p.diagnosis}.`
   }));
+  const recentActivityData = [
+      { name: 'Michael', task: 'Morning Routine', date: 'Today, 10:24 AM', value: '92%' },
+      { name: 'Sarah', task: 'Social Greetings', date: 'Yesterday, 3:45 PM', value: '78%' },
+      { name: 'Alex', task: 'Emotional Regulation', date: 'Sept 14, 9:15 AM', value: 'In Progress' }
+  ];
 
-  // Current logged in user info (simulate)
-  let currentUser = {
-    name: "Dr. Jane Doe",
-    role: "user", // or "supervisor"
-    initials: "JD"
-  };
+  let currentUser = {};
 
-  // Utility to format date
-  function formatDate(date) {
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  // DOM Elements
+  const loginScreen = document.getElementById('login-screen');
+  const signupScreen = document.getElementById('signup-screen');
+  const forgotPasswordScreen = document.getElementById('forgot-password-screen');
+  const mainDashboard = document.getElementById('main-dashboard');
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.dashboard-section');
+  const moduleVideoPage = document.getElementById('module-video-page');
+
+  // --- UI Population Functions ---
+  function populateRecentActivity() {
+      const list = document.getElementById('recent-activity-list');
+      list.innerHTML = recentActivityData.map(item => `
+        <div class="progress-item">
+          <div class="progress-info">
+            <div class="progress-name">${item.name} completed ${item.task}</div>
+            <div class="progress-date">${item.date}</div>
+          </div>
+          <div class="progress-value">${item.value}</div>
+        </div>`).join('');
   }
 
-  // Populate patients table
   function populatePatients() {
     const tbody = document.querySelector("#patients-table tbody");
-    tbody.innerHTML = "";
-    patientsData.forEach(p => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${p.name}</td>
-        <td>${p.age}</td>
-        <td>${p.diagnosis}</td>
-        <td>${p.lastSession}</td>
-        <td>${p.status}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+    tbody.innerHTML = patientsData.map(p => `
+      <tr>
+        <td>${p.name}</td><td>${p.age}</td><td>${p.diagnosis}</td>
+        <td>${p.lastSession}</td><td>${p.status}</td>
+      </tr>`).join('');
   }
 
-  // Populate reports table
   function populateReports(sortBy = "date-desc") {
     const tbody = document.querySelector("#reports-table tbody");
-    tbody.innerHTML = "";
-
     let sortedReports = [...reportsData];
-    switch(sortBy) {
-      case "date-desc":
-        sortedReports.sort((a,b) => b.date - a.date);
-        break;
-      case "date-asc":
-        sortedReports.sort((a,b) => a.date - b.date);
-        break;
-      case "name-asc":
-        sortedReports.sort((a,b) => a.name.localeCompare(b.name));
-        break;
-      case "name-desc":
-        sortedReports.sort((a,b) => b.name.localeCompare(a.name));
-        break;
-    }
+    const compare = (a, b, key, asc = true) => {
+        const valA = a[key], valB = b[key];
+        if (valA < valB) return asc ? -1 : 1;
+        if (valA > valB) return asc ? 1 : -1;
+        return 0;
+    };
+    if (sortBy === 'date-desc') sortedReports.sort((a,b) => b.date - a.date);
+    else if (sortBy === 'date-asc') sortedReports.sort((a,b) => a.date - b.date);
+    else if (sortBy === 'name-asc') sortedReports.sort((a,b) => a.name.localeCompare(b.name));
+    else if (sortBy === 'name-desc') sortedReports.sort((a,b) => b.name.localeCompare(a.name));
 
-    sortedReports.forEach(r => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r.name}</td>
-        <td>${r.date.toLocaleDateString()}</td>
-        <td>${r.summary}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+    tbody.innerHTML = sortedReports.map(r => `
+      <tr>
+        <td>${r.name}</td><td>${r.date.toLocaleDateString()}</td><td>${r.summary}</td>
+      </tr>`).join('');
   }
 
-  // Generate progress tracking line graphs
   function generateProgressTracking() {
     const container = document.getElementById("progress-comparison");
     container.innerHTML = "";
-
     patientsData.forEach(p => {
-      // Generate random data points for past and present (7 days)
       const days = 7;
       const pastData = Array.from({length: days}, () => Math.floor(Math.random() * 50) + 30);
-      const presentData = pastData.map(val => Math.min(100, val + Math.floor(Math.random() * 30)));
-
-      // Create SVG line graph container
-      const svgWidth = 300;
-      const svgHeight = 150;
-      const padding = 30;
-
-      // Scale function for y-axis (0-100%)
+      const presentData = pastData.map(val => Math.min(100, val + Math.floor(Math.random() * 30) - 5));
+      const svgWidth = 300, svgHeight = 150, padding = 30;
       const scaleY = val => svgHeight - padding - (val / 100) * (svgHeight - 2 * padding);
-      // Scale function for x-axis
       const scaleX = i => padding + (i * (svgWidth - 2 * padding)) / (days - 1);
+      const createPoints = data => data.map((val, i) => `${scaleX(i)},${scaleY(val)}`).join(" ");
 
-      // Create SVG element
-      const svgNS = "http://www.w3.org/2000/svg";
-      const svg = document.createElementNS(svgNS, "svg");
-      svg.setAttribute("width", svgWidth);
-      svg.setAttribute("height", svgHeight);
-      svg.style.marginBottom = "30px";
-      svg.style.background = "var(--card-bg)";
-      svg.style.borderRadius = "15px";
-      svg.style.boxShadow = "var(--shadow)";
-      svg.style.display = "block";
-
-      // Title label
-      const label = document.createElement("div");
-      label.className = "progress-bar-label";
-      label.textContent = ${p.name} (${p.diagnosis});
-      label.style.fontWeight = "700";
-      label.style.marginBottom = "8px";
-
-      // Draw axes lines
-      const axisX = document.createElementNS(svgNS, "line");
-      axisX.setAttribute("x1", padding);
-      axisX.setAttribute("y1", svgHeight - padding);
-      axisX.setAttribute("x2", svgWidth - padding);
-      axisX.setAttribute("y2", svgHeight - padding);
-      axisX.setAttribute("stroke", "#ccc");
-      axisX.setAttribute("stroke-width", "2");
-      svg.appendChild(axisX);
-
-      const axisY = document.createElementNS(svgNS, "line");
-      axisY.setAttribute("x1", padding);
-      axisY.setAttribute("y1", padding);
-      axisY.setAttribute("x2", padding);
-      axisY.setAttribute("y2", svgHeight - padding);
-      axisY.setAttribute("stroke", "#ccc");
-      axisY.setAttribute("stroke-width", "2");
-      svg.appendChild(axisY);
-
-      // Function to create polyline points string
-      const createPoints = data => data.map((val, i) => ${scaleX(i)},${scaleY(val)}).join(" ");
-
-      // Past data polyline (red)
-      const pastLine = document.createElementNS(svgNS, "polyline");
-      pastLine.setAttribute("points", createPoints(pastData));
-      pastLine.setAttribute("fill", "none");
-      pastLine.setAttribute("stroke", "var(--accent)");
-      pastLine.setAttribute("stroke-width", "3");
-      svg.appendChild(pastLine);
-
-      // Present data polyline (green)
-      const presentLine = document.createElementNS(svgNS, "polyline");
-      presentLine.setAttribute("points", createPoints(presentData));
-      presentLine.setAttribute("fill", "none");
-      presentLine.setAttribute("stroke", "var(--success)");
-      presentLine.setAttribute("stroke-width", "3");
-      svg.appendChild(presentLine);
-
-      // Legend
-      const legend = document.createElement("div");
-      legend.style.display = "flex";
-      legend.style.justifyContent = "center";
-      legend.style.gap = "20px";
-      legend.style.marginBottom = "20px";
-
-      const pastLegend = document.createElement("div");
-      pastLegend.innerHTML = <span style="display:inline-block;width:15px;height:15px;background:var(--accent);margin-right:6px;"></span>Past;
-
-      const presentLegend = document.createElement("div");
-      presentLegend.innerHTML = <span style="display:inline-block;width:15px;height:15px;background:var(--success);margin-right:6px;"></span>Present;
-
-      legend.appendChild(pastLegend);
-      legend.appendChild(presentLegend);
-
-      // Container div for label + legend + svg
       const wrapper = document.createElement("div");
-      wrapper.style.marginBottom = "40px";
-      wrapper.style.maxWidth = svgWidth + "px";
-      wrapper.style.marginLeft = "auto";
-      wrapper.style.marginRight = "auto";
-
-      wrapper.appendChild(label);
-      wrapper.appendChild(legend);
-      wrapper.appendChild(svg);
-
+      wrapper.className = "progress-graph-wrapper";
+      wrapper.innerHTML = `
+        <div class="progress-graph-label">${p.name} (${p.diagnosis})</div>
+        <div class="progress-graph-legend">
+          <div><span style="display:inline-block;width:15px;height:15px;background:var(--accent);margin-right:6px;vertical-align:middle;"></span>Past</div>
+          <div><span style="display:inline-block;width:15px;height:15px;background:var(--success);margin-right:6px;vertical-align:middle;"></span>Present</div>
+        </div>
+        <svg width="${svgWidth}" height="${svgHeight}" class="progress-graph-svg" xmlns="http://www.w3.org/2000/svg">
+          <line class="axis-line" x1="${padding}" y1="${svgHeight-padding}" x2="${svgWidth-padding}" y2="${svgHeight-padding}"></line>
+          <line class="axis-line" x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgHeight - padding}"></line>
+          <polyline class="past-line" points="${createPoints(pastData)}"></polyline>
+          <polyline class="present-line" points="${createPoints(presentData)}"></polyline>
+        </svg>
+      `;
       container.appendChild(wrapper);
     });
   }
 
-  // Show/hide nav items based on role
+  // --- UI Update Functions ---
   function updateNavForRole(role) {
     const patientsNav = document.getElementById("nav-patients");
-    const demosNav = document.getElementById("nav-demos");
-
-    if(role === "user") {
-      patientsNav.style.display = "none";
-      demosNav.style.display = "block";
-    } else if(role === "supervisor") {
-      patientsNav.style.display = "block";
-      demosNav.style.display = "none";}
-      }
-
-  // Navigation and section switching
-  const navItems = document.querySelectorAll('.nav-item');
-  const sections = document.querySelectorAll('.dashboard-section');
-  const moduleVideoPage = document.getElementById('module-video-page');
-  const modulesList = document.getElementById('modules-list');
-
-  function showSection(sectionId) {
-    sections.forEach(section => {
-      section.classList.remove('active');
-    });
-    moduleVideoPage.style.display = 'none';
-    if(sectionId === 'module-video-page') {
-      moduleVideoPage.style.display = 'block';
-    } else {
-      const section = document.getElementById(sectionId + '-section');
-      if(section) section.classList.add('active');
-    }
+    patientsNav.style.display = (role === "supervisor") ? "flex" : "none";
   }
 
-  navItems.forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
-      if(item.id === 'logout-btn') return;
-      const targetSection = item.getAttribute('data-section');
-      if(!targetSection) return;
+  function showScreen(screen) {
+    [loginScreen, signupScreen, forgotPasswordScreen, mainDashboard].forEach(s => s.style.display = 'none');
+    screen.style.display = 'flex';
+    if(screen === mainDashboard) mainDashboard.style.display = 'block';
+    if(screen === loginScreen) loginScreen.style.display = 'flex';
+  }
 
-      // Update active nav
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
+  function showSection(sectionId) {
+    sections.forEach(s => s.classList.remove('active'));
+    moduleVideoPage.classList.remove('active');
 
-      showSection(targetSection);
-    });
-  });
+    const targetSection = document.getElementById(sectionId + '-section');
+    if (targetSection) targetSection.classList.add('active');
+  }
 
-  // Module cards click event
-  modulesList.querySelectorAll('.module-card').forEach(card => {
-    card.addEventListener('click', () => {
-      // Show module video page
-      showSection('module-video-page');
-      // Update video placeholder text
-      const moduleName = card.textContent.trim();
-      const placeholder = document.getElementById('module-video-placeholder');
-      placeholder.textContent = ${moduleName} video will be uploaded here later;
-    });
-  });
+  function initProfileFields() {
+    document.getElementById('profile-name').value = currentUser.name;
+    document.getElementById('profile-email').value = currentUser.email;
+  }
 
-  // Back button on module video page
-  document.getElementById('module-back-btn').addEventListener('click', () => {
-    // Return to modules section
-    showSection('modules');
-    // Set modules nav active
-    navItems.forEach(nav => nav.classList.remove('active'));
-    document.querySelector('.nav-item[data-section="modules"]').classList.add('active');
-  });
-
-  // Login functionality
-  const loginBtn = document.getElementById('login-btn');
-  const loginScreen = document.getElementById('login-screen');
-  const mainDashboard = document.getElementById('main-dashboard');
-  const userTypes = document.querySelectorAll('.user-type');
-  const userNameDisplay = document.getElementById('user-name');
-  const userRoleDisplay = document.getElementById('user-role');
-  const userAvatar = document.getElementById('user-avatar');
-
-  loginBtn.addEventListener('click', () => {
-    // Get selected user type
+  // --- Event Listeners ---
+  // Login & Screen Navigation
+  document.getElementById('login-btn').addEventListener('click', () => {
     const selectedType = document.querySelector('.user-type.active').getAttribute('data-type');
-    currentUser .role = selectedType;
-    currentUser .name = selectedType === 'user' ? 'John Doe' : 'Dr. Jane Doe';
-    currentUser .initials = currentUser .name.split(' ').map(n => n[0]).join('').toUpperCase();
+    currentUser = {
+      role: selectedType,
+      name: selectedType === 'user' ? 'John Doe' : 'Dr. Jane Doe',
+      email: selectedType === 'user' ? 'john.doe@example.com' : 'dr.jane.doe@example.com',
+      get initials() { return this.name.split(' ').map(n => n[0]).join('').toUpperCase(); }
+    };
+    
+    document.getElementById('user-name').textContent = currentUser.name;
+    document.getElementById('user-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+    document.getElementById('user-avatar').textContent = currentUser.initials;
 
-    // Update dashboard user info
-    userNameDisplay.textContent = currentUser .name;
-    userRoleDisplay.textContent = currentUser .role.charAt(0).toUpperCase() + currentUser .role.slice(1);
-    userAvatar.textContent = currentUser .initials;
-
-    // Show/hide nav items based on role
-    updateNavForRole(currentUser .role);
-
-    // Show dashboard, hide login
-    loginScreen.style.display = 'none';
-    mainDashboard.style.display = 'block';
-
-    // Populate patients and reports
+    updateNavForRole(currentUser.role);
+    populateRecentActivity();
     populatePatients();
     populateReports();
     generateProgressTracking();
-
-    // Show overview section by default
+    initProfileFields();
+    
+    showScreen(mainDashboard);
     showSection('overview');
-    navItems.forEach(nav => nav.classList.remove('active'));
+    document.querySelector('.nav-item.active').classList.remove('active');
     document.querySelector('.nav-item[data-section="overview"]').classList.add('active');
   });
 
-  // Logout functionality
   document.getElementById('logout-btn').addEventListener('click', e => {
     e.preventDefault();
-    mainDashboard.style.display = 'none';
-    loginScreen.style.display = 'flex';
-    // Reset login form
+    showScreen(loginScreen);
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
-    // Reset user type to user
-    userTypes.forEach(t => t.classList.remove('active'));
-    userTypes[0].classList.add('active');
   });
 
-  // User type selection on login screen
-  userTypes.forEach(type => {
+  document.querySelectorAll('.user-type').forEach(type => {
     type.addEventListener('click', () => {
-      userTypes.forEach(t => t.classList.remove('active'));
+      document.querySelector('.user-type.active').classList.remove('active');
       type.classList.add('active');
     });
   });
 
-  // Sign Up and Forgot Password navigation
-  const signupScreen = document.getElementById('signup-screen');
-  const forgotPasswordScreen = document.getElementById('forgot-password-screen');
+  // Auth screen toggles
+  document.getElementById('sign-up-link').addEventListener('click', e => { e.preventDefault(); showScreen(signupScreen); });
+  document.getElementById('forgot-password-link').addEventListener('click', e => { e.preventDefault(); showScreen(forgotPasswordScreen); });
+  document.getElementById('back-to-login-link').addEventListener('click', e => { e.preventDefault(); showScreen(loginScreen); });
+  document.getElementById('back-to-login-link2').addEventListener('click', e => { e.preventDefault(); showScreen(loginScreen); });
+  document.getElementById('signup-btn').addEventListener('click', () => { alert('Account created successfully! Please login.'); showScreen(loginScreen); });
+  document.getElementById('reset-password-btn').addEventListener('click', () => { alert('Password reset link sent to your email.'); showScreen(loginScreen); });
 
-  document.getElementById('sign-up-link').addEventListener('click', e => {
-    e.preventDefault();
-    loginScreen.style.display = 'none';
-    signupScreen.style.display = 'flex';
+  // Dashboard Navigation
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      if (item.id === 'logout-btn') return;
+      
+      const targetSection = item.getAttribute('data-section');
+      if (!targetSection) return;
+
+      document.querySelector('.nav-item.active').classList.remove('active');
+      item.classList.add('active');
+      showSection(targetSection);
+    });
   });
 
-  document.getElementById('forgot-password-link').addEventListener('click', e => {
-    e.preventDefault();
-    loginScreen.style.display = 'none';
-    forgotPasswordScreen.style.display = 'flex';
+  // Module Navigation
+  document.querySelectorAll('.module-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const moduleName = card.getAttribute('data-module');
+      document.getElementById('module-video-placeholder').textContent = `${moduleName} video will be uploaded here later`;
+      moduleVideoPage.classList.add('active');
+    });
   });
 
-  document.getElementById('back-to-login-link').addEventListener('click', e => {
-    e.preventDefault();
-    signupScreen.style.display = 'none';
-    loginScreen.style.display = 'flex';
+  document.getElementById('module-back-btn').addEventListener('click', () => {
+    moduleVideoPage.classList.remove('active');
   });
 
-  document.getElementById('back-to-login-link2').addEventListener('click', e => {
-    e.preventDefault();
-    forgotPasswordScreen.style.display = 'none';
-    loginScreen.style.display = 'flex';
-  });
-
-  // Sign Up button (simulate account creation)
-  document.getElementById('signup-btn').addEventListener('click', () => {
-    alert('Account created successfully! Please login.');
-    signupScreen.style.display = 'none';
-    loginScreen.style.display = 'flex';
-  });
-
-  // Reset Password button (simulate)
-  document.getElementById('reset-password-btn').addEventListener('click', () => {
-    alert('Password reset link sent to your email.');
-    forgotPasswordScreen.style.display = 'none';
-    loginScreen.style.display = 'flex';
-  });
-
-  // Reports sorting
-  document.getElementById('sort-reports').addEventListener('change', e => {
-    populateReports(e.target.value);
-  });
-
-  // Download PDF report (simple text PDF generation)
-  document.getElementById('download-pdf-btn').addEventListener('click', () => {
+  // Reports Page
+  document.getElementById('sort-reports').addEventListener('change', e => populateReports(e.target.value));
+  document.getElementById('download-report-btn').addEventListener('click', () => {
     let content = 'ImmersiLearn VR - Patient Reports\n\n';
     reportsData.forEach(r => {
-      content += Name: ${r.name}\nDate: ${r.date.toLocaleDateString()}\nSummary: ${r.summary}\n\n;
+      content += `Name: ${r.name}\nDate: ${r.date.toLocaleDateString()}\nSummary: ${r.summary}\n\n`;
     });
-    const blob = new Blob([content], { type: 'application/pdf' });
+    const blob = new Blob([content], { type: 'text/plain' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'patient_reports.txt'; // Using .txt because PDF generation requires libraries
+    link.download = 'patient_reports.txt';
     link.click();
+    URL.revokeObjectURL(link.href);
   });
 
-  // Settings: Save profile
+  // Settings Page
   document.getElementById('save-profile-btn').addEventListener('click', () => {
     const newName = document.getElementById('profile-name').value.trim();
-    const newEmail = document.getElementById('profile-email').value.trim();
-    if(newName && newEmail) {
-      currentUser .name = newName;
-      userNameDisplay.textContent = newName;
+    if(newName) {
+      currentUser.name = newName;
+      document.getElementById('user-name').textContent = currentUser.name;
+      document.getElementById('user-avatar').textContent = currentUser.initials;
       alert('Profile updated successfully!');
     } else {
-      alert('Please fill in all profile fields.');
+      alert('Name cannot be empty.');
     }
   });
 
-  // Settings: Change password (simulate)
-  document.getElementById('change-password-btn').addEventListener('click', () => {
-    const currentPass = document.getElementById('current-password').value;
-    const newPass = document.getElementById('new-password').value;
-    const confirmPass = document.getElementById('confirm-password').value;
-    if(!currentPass || !newPass || !confirmPass) {
-      alert('Please fill in all password fields.');
-      return;
-    }
-    if(newPass !== confirmPass) {
-      alert('New passwords do not match.');
-      return;
-    }
-    alert('Password changed successfully!');
-    // Clear fields
-    document.getElementById('current-password').value = '';
-    document.getElementById('new-password').value = '';
-    document.getElementById('confirm-password').value = '';
+  document.getElementById('change-password-btn').addEventListener('click', () => alert('Password changed successfully! (Simulated)'));
+  
+  document.getElementById('dark-mode-toggle').addEventListener('change', (e) => {
+    document.body.classList.toggle('dark-mode', e.target.checked);
   });
-
-  // Dark mode toggle
-  const darkModeToggle = document.getElementById('dark-mode-toggle');
-  darkModeToggle.addEventListener('change', () => {
-    if(darkModeToggle.checked) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  });
-
-  // Report an issue submission
+  
   document.getElementById('submit-issue-btn').addEventListener('click', () => {
-    const issueType = document.getElementById('issue-select').value;
-    const issueDesc = document.getElementById('issue-description').value.trim();
     const feedback = document.getElementById('issue-feedback');
-
-    if(!issueType) {
-      feedback.style.color = 'red';
-      feedback.textContent = 'Please select an issue type.';
-      return;
-    }
-    if(issueType === 'other' && !issueDesc) {
-      feedback.style.color = 'red';
-      feedback.textContent = 'Please describe your issue.';
-      return;
-    }
-
-    // Simulate submission
     feedback.style.color = 'green';
     feedback.textContent = 'Thank you for reporting the issue. We will look into it.';
-    // Clear inputs
-    document.getElementById('issue-select').value = '';
-    document.getElementById('issue-description').value = '';
+    setTimeout(() => feedback.textContent = '', 3000);
   });
-
-  // Initialize profile fields on dashboard load
-  function initProfileFields() {
-    document.getElementById('profile-name').value = currentUser .name;
-    document.getElementById('profile-email').value = 'user@example.com'; // Placeholder email
-  }
-
-  // Initialize on page load
-  window.addEventListener('load', () => {
-    initProfileFields();
-  });
+});
 </script>
 </body>
 </html>
